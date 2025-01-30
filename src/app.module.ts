@@ -4,8 +4,13 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { CountryModule } from './endpoint1/country.module';
+import { CountryModule } from './country/country.module';
 import { Countries } from './entity/country.entity';
+import { TimeSeries } from './entity/timeseries.entity';
+import { TimeSeriesModule } from './timeseries/timeseries.module';
+import { CountriesModule } from './Previous Endpoints/Endpoint 1/country.module';
+import { TotalModule } from './Previous Endpoints/Endpoint 2/total.module';
+import { CaseModule } from './Previous Endpoints/Endpoint 3/cases.module';
 
 @Module({
   imports: [
@@ -23,11 +28,15 @@ import { Countries } from './entity/country.entity';
         username: 'root',
         password: '',
         host: "localhost",
-        entities: [Countries],
+        entities: [Countries, TimeSeries],
         synchronize: false,
       }),
     }),
     CountryModule,
+    TimeSeriesModule,
+    CountriesModule,
+    TotalModule,
+    CaseModule
   ],
   controllers: [AppController],
   providers: [AppService],

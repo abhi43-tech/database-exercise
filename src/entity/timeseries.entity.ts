@@ -1,12 +1,15 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Countries } from './country.entity';
 
-@Entity()
+@Entity('timeseries')
 export class TimeSeries {
+  @PrimaryGeneratedColumn()
+  id: number;
 
   @Column({
     nullable: false
   })
-  country: string
+  name: string
 
   @Column({
     type: 'varchar',
@@ -31,4 +34,8 @@ export class TimeSeries {
     nullable: true,
   })
   recovered: number;
+
+  @ManyToOne(() => Countries, (country) => country.timeseries)
+  @JoinColumn({ name: 'name', referencedColumnName: 'country' })
+  country: Countries;
 }
