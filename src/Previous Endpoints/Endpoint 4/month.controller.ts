@@ -7,22 +7,16 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { TotalService } from './total.service';
+import { MonthService } from './month.service';
 import { dateDto } from 'src/dto/date.dto';
-import { ApiBody, ApiQuery } from '@nestjs/swagger';
+import { ApiQuery } from '@nestjs/swagger';
 
-@Controller('total')
-export class TotalController {
-  constructor(private readonly totalService: TotalService) {}
+@Controller('month')
+export class MonthController {
+  constructor(private readonly monthService: MonthService) {}
 
   @Get()
   @UsePipes(new ValidationPipe())
-  @ApiQuery({
-    name: 'iso',
-    description: 'Enter Country ISO code',
-    required: false,
-    type: String,
-  })
   @ApiQuery({
     name: 'from',
     description: 'Start date in YYYY-MM-DD format',
@@ -35,10 +29,23 @@ export class TotalController {
     required: false,
     type: String,
   })
-  getData(
+  @ApiQuery({
+    name: 'less',
+    description: 'Filter cases with number less than this value',
+    required: false,
+    type: Number,
+  })
+  @ApiQuery({
+    name: 'greater',
+    description: 'Filter cases with number greater than this value',
+    required: false,
+    type: Number,
+  })
+  async getMonthlyCases(
     @Query('from') from?: string,
     @Query('to') to?: string,
-    @Query('iso') iso?: string,
+    @Query('greater') greater?: number,
+    @Query('less') less?: number,
   ) {
     if (from && !this.isValidDate(from)) {
       throw new BadRequestException(
@@ -58,10 +65,11 @@ export class TotalController {
       );
     }
 
-    const date: dateDto = { from, to };
-    if (date.from || date.to || iso)
-      return this.totalService.getFilterData(date, iso);
-    return this.totalService.getData();
+    const date: dateDto = from && to ? { from, to } : null;
+    if (greater || less)
+      return this.monthService.getByNumbers(greater, date, less);
+    if (!date) return this.monthService.getMonthlyCases();
+    return await this.monthService.getByDate(date);
   }
 
   private isValidDate(date: string): boolean {

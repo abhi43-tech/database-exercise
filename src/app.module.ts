@@ -11,6 +11,9 @@ import { TimeSeriesModule } from './timeseries/timeseries.module';
 import { CountriesModule } from './Previous Endpoints/Endpoint 1/country.module';
 import { TotalModule } from './Previous Endpoints/Endpoint 2/total.module';
 import { CaseModule } from './Previous Endpoints/Endpoint 3/cases.module';
+import { MonthModule } from './Previous Endpoints/Endpoint 4/month.module';
+import { TopModule } from './Previous Endpoints/Endpoint 5/top.module';
+import { EXcelModule } from './Previous Endpoints/Endpoint 6/excel.module';
 
 @Module({
   imports: [
@@ -36,12 +39,17 @@ import { CaseModule } from './Previous Endpoints/Endpoint 3/cases.module';
     TimeSeriesModule,
     CountriesModule,
     TotalModule,
-    CaseModule
+    CaseModule,
+    MonthModule,
+    TopModule,
+    EXcelModule
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule {
+  
+}
 
 // type: 'configService.get<string>('DB_TYPE') as any',
 //         host: configService.get<string>('DB_HOST'),

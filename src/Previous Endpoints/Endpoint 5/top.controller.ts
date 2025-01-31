@@ -7,22 +7,16 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { TotalService } from './total.service';
+import { TopService } from './top.service';
 import { dateDto } from 'src/dto/date.dto';
-import { ApiBody, ApiQuery } from '@nestjs/swagger';
+import { ApiQuery } from '@nestjs/swagger';
 
-@Controller('total')
-export class TotalController {
-  constructor(private readonly totalService: TotalService) {}
+@Controller('top')
+export class TopController {
+  constructor(private readonly topService: TopService) {}
 
   @Get()
   @UsePipes(new ValidationPipe())
-  @ApiQuery({
-    name: 'iso',
-    description: 'Enter Country ISO code',
-    required: false,
-    type: String,
-  })
   @ApiQuery({
     name: 'from',
     description: 'Start date in YYYY-MM-DD format',
@@ -35,10 +29,16 @@ export class TotalController {
     required: false,
     type: String,
   })
+  @ApiQuery({
+    name: 'top',
+    description: 'Filter top N countries by Confirmed cases',
+    required: false,
+    type: Number,
+  })
   getData(
+    @Query('top') top: number,
     @Query('from') from?: string,
     @Query('to') to?: string,
-    @Query('iso') iso?: string,
   ) {
     if (from && !this.isValidDate(from)) {
       throw new BadRequestException(
@@ -58,12 +58,9 @@ export class TotalController {
       );
     }
 
-    const date: dateDto = { from, to };
-    if (date.from || date.to || iso)
-      return this.totalService.getFilterData(date, iso);
-    return this.totalService.getData();
+    const date: dateDto = from && to ? { from, to } : null;
+    return this.topService.getTopData(top, date);
   }
-
   private isValidDate(date: string): boolean {
     const regex = /^\d{4}-\d{1,2}-\d{2}$/;
     return regex.test(date);
