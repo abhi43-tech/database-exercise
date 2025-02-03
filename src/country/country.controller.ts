@@ -6,19 +6,22 @@ import {
   Param,
   Post,
   Put,
+  Query,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 import { CountryService } from './country.service';
 import { createCountry, updateCountry } from 'src/dto/country.dto';
+import { PaginationDto } from 'src/pagination/pagination.dto';
 
 @Controller('country')
 export class CountryController {
   constructor(private readonly countryService: CountryService) {}
 
   @Get()
-  async getAllCountry() {
-    return await this.countryService.getAllCountry();
+  async getAllCountry(@Query('page') page: number, @Query('pageSize') pageSize: number) {
+    const paginate: PaginationDto = {page:page, pageSize: pageSize}
+    return await this.countryService.getAllCountry(paginate);
   }
 
   // 1st

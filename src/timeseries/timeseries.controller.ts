@@ -1,6 +1,7 @@
 import { Body, Controller, Delete, Get, Post, Put, Query, UsePipes, ValidationPipe } from "@nestjs/common";
 import { TimeSeriesService } from "./timeseries.service";
 import { createTimeseries, deleteTimeseries, updateTimeseries } from "src/dto/timeseries.dto";
+import { PaginationDto } from "src/pagination/pagination.dto";
 
 @Controller('timeseries')
 export class TimeSeriesController {
@@ -8,8 +9,9 @@ export class TimeSeriesController {
   constructor(private readonly timeseriesService: TimeSeriesService) {}
 
   @Get()
-  async getTime() {
-    return await this.timeseriesService.getTime();
+  async getTime(@Query("page") page: number, @Query('pageSize') pageSize: number) {
+    const paginate: PaginationDto = {page: page, pageSize: pageSize}
+    return await this.timeseriesService.getTime(paginate);
   }
 
   // 5th
