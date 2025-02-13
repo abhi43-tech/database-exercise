@@ -1,126 +1,48 @@
-import {
-  BadRequestException,
-  ConflictException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { createCountry, updateCountry } from 'src/dto/country.dto';
-import { Countries } from 'src/entity/country.entity';
-import { TimeSeries } from 'src/entity/timeseries.entity';
-import { PaginationDto } from 'src/pagination/pagination.dto';
-import { PaginationService } from 'src/pagination/pagination.service';
-import { ResponseDto } from 'src/pagination/response.dto';
-import { DataSource, EntityManager, Repository, Transaction } from 'typeorm';
+import { Injectable } from '@nestjs/common';
+import { CreateCountry, UpdateCountry } from './dto/country.dto';
+import { PaginationDto } from '../pagination/dto/pagination.dto';
+import { PaginationService } from './../pagination/pagination.service';
+import { ResponseDto } from '../pagination/dto/response.dto';
+import { Countries } from './entity/country.entity';
+import { CountryRepository } from './repository/country.repository';
 
 @Injectable()
 export class CountryService {
   constructor(
-    @InjectRepository(Countries) private countryRepo: Repository<Countries>,
-    @InjectRepository(TimeSeries) private timeRepo: Repository<TimeSeries>,
-    private dataSource: DataSource,
-    private readonly paginationService: PaginationService
+    private readonly countryRepo: CountryRepository,
+    private readonly paginationService: PaginationService,
   ) {}
 
-  public async getAllCountry(paginate: PaginationDto): Promise<ResponseDto<Countries>> {
-    return await this.paginationService.paginateData(paginate)
+  // Retrives all countries using pagination 
+  public async get(paginate: PaginationDto): Promise<ResponseDto<Countries>> {
+    return await this.paginationService.paginateData(paginate);
   }
 
-  // 1st
-  public async createCountry(countryData: createCountry): Promise<Countries> {
-    const queryRunner = this.countryRepo.manager.connection.createQueryRunner();
-    await queryRunner.startTransaction();
-
-    try {
-      const newCountry = await queryRunner.manager.create(
-        Countries,
-        countryData,
-      );
-      const existingCountry = await queryRunner.manager.findOne(Countries, {
-        where: { code: countryData.code },
-      });
-
-      if (existingCountry) {
-        throw new ConflictException('ISO Code already exists');
-      }
-
-      return await queryRunner.manager.save(newCountry);
-    } catch (err) {
-      await queryRunner.rollbackTransaction();
-      throw err;  
-    } finally {
-      await queryRunner.release();
-    }
+  // Create country
+  public async create(countryData: CreateCountry): Promise<Countries> {
+    return await this.countryRepo.createCountry(countryData);
   }
 
-  // 2nd
-  public async updateCountry(
+  // Update coutnry
+  public async update(
     id: number,
-    countryData: updateCountry,
+    countryData: UpdateCountry,
   ): Promise<Countries> {
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-
-    try {
-      const existingCountry = await queryRunner.manager.findOne(Countries, {
-        where: { id: id },
-      });
-
-      if (!existingCountry)
-        throw new NotFoundException(
-          'Country with given ID is not found in Database.',
-        );
-
-      if (countryData?.country) existingCountry.country = countryData.country;
-      if (countryData?.code) {
-        const existingCountryCode = await queryRunner.manager.findOne(Countries, {
-          where: { code: countryData.code },
-        });
-        if (existingCountryCode)
-          throw new BadRequestException(
-            'Country with given code is already exists.',
-          );
-        else existingCountry.code = countryData.code;
-      }
-      if (countryData?.flag) existingCountry.flag = countryData.flag;
-
-      return await queryRunner.manager.save(existingCountry);
-    } catch (err) {
-      await queryRunner.rollbackTransaction()
-      throw err;
-    } finally {
-      await queryRunner.release();
-    }
+    return await this.countryRepo.updateCountry(id, countryData);
   }
 
-  // 3rd
-  public async deleteCountry(id: number): Promise<Countries> {
-    const country = await this.countryRepo.findOne({
-      relations: { timeseries: true },
-      where: { id: id },
-    });
-    if (!country)
-      throw new NotFoundException('Country with given ID od not found.');
-    if (country.timeseries.length > 0) {
-      throw new BadRequestException(
-        'This country is not deleted because, it have timeseries data.',
-      );
-    }
-    return await this.countryRepo.remove(country);
+  // Delete country
+  public async delete(id: number): Promise<Countries> {
+    return await this.countryRepo.deleteCountry(id);
   }
 
-  // 4th
+  // Get country
   public async getCountry(id: number) {
-    const country = await this.countryRepo.findOne({
-      where: { id: id },
-    });
+    return await this.countryRepo.getCountry(id);
+  }
 
-    if (!country) throw new NotFoundException('Coutnry is not found.');
-    const data = await this.countryRepo.findOne({
-      relations: { timeseries: true },
-      where: { id: id },
-    });
-    return data;
+  // Get country from name or ISO code
+  public async getSearchData(name?: string, code?: string) {
+    return await this.countryRepo.getSearchData(name, code);
   }
 }

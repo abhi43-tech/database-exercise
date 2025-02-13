@@ -1,6 +1,6 @@
-import { swaggerConfig } from "./swagger.interface";
+import { SwaggerConfig } from './swagger.interface';
 
-export const SWAGGER_CONFIG: swaggerConfig = {
+export const SWAGGER_CONFIG: SwaggerConfig = {
   title: 'Covid-Data',
   description: 'Database',
   version: '1.0',

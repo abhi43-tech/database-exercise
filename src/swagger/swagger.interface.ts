@@ -1,4 +1,4 @@
-export interface swaggerConfig {
+export interface SwaggerConfig {
   title: string;
 
   description: string;

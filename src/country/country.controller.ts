@@ -11,40 +11,87 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { CountryService } from './country.service';
-import { createCountry, updateCountry } from 'src/dto/country.dto';
-import { PaginationDto } from 'src/pagination/pagination.dto';
+import { CreateCountry, UpdateCountry } from './dto/country.dto';
+import { PaginationDto } from '../pagination/dto/pagination.dto';
+import { ApiQuery } from '@nestjs/swagger';
+import { Countries } from './entity/country.entity';
 
 @Controller('country')
 export class CountryController {
   constructor(private readonly countryService: CountryService) {}
 
   @Get()
-  async getAllCountry(@Query('page') page: number, @Query('pageSize') pageSize: number) {
-    const paginate: PaginationDto = {page:page, pageSize: pageSize}
-    return await this.countryService.getAllCountry(paginate);
+  async get(@Query('page') page: number, @Query('pageSize') pageSize: number) {
+    const paginate: PaginationDto = { page: page, pageSize: pageSize };
+    return await this.countryService.get(paginate);
   }
 
-  // 1st
+  /**
+   *  Create country if ISO code is valid and unique
+   * 
+   * @Body country
+   * @returns
+   */
   @Post()
   @UsePipes(new ValidationPipe())
-  async newCountry(@Body() country: createCountry) {
-    return await this.countryService.createCountry(country);
+  async new(@Body() country: CreateCountry): Promise<Countries> {
+    return await this.countryService.create(country);
   }
 
-  // 2nd
+  /**
+   * Update country and ensure that ISO is unqiue and valid
+   * 
+   * @param id 
+   * @Body country 
+   * @returns 
+   */
   @Put(':id')
   @UsePipes(new ValidationPipe())
-  async updateCountry(@Param('id') id: number, @Body() country: updateCountry) {
-    return await this.countryService.updateCountry(id, country);
+  async update(@Param('id') id: number, @Body() country: UpdateCountry) {
+    return await this.countryService.update(id, country);
   }
 
-  // 3rd
+  /**
+   *  Delete country if Timeseries data is not exist for that country
+   *  
+   * @param id 
+   * @returns 
+   */
   @Delete(':id')
-  async deleteCountry(@Param('id') id: number) {
-    return await this.countryService.deleteCountry(id);
+  async delete(@Param('id') id: number) {
+    return await this.countryService.delete(id);
   }
 
-  // 4th
+  /**
+   * Get country by name or code 
+   * 
+   * @param name 
+   * @param code 
+   * @returns 
+   */
+  @Get('search')
+  @ApiQuery({
+    name: 'name',
+    description: 'Enter Country Name',
+    required: false,
+    type: String,
+  })
+  @ApiQuery({
+    name: 'code',
+    description: 'Enter Country Code',
+    required: false,
+    type: String,
+  })
+  getSearchData(@Query('name') name?: string, @Query('code') code?: string) {
+    return this.countryService.getSearchData(name, code);
+  }
+
+  /**
+   *  Get country data with Timeseries data by country ID
+   * 
+   * @param id 
+   * @returns 
+   */
   @Get(':id')
   async getCountry(@Param('id') id: number) {
     return await this.countryService.getCountry(id);
