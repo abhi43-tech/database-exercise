@@ -69,7 +69,7 @@ export class CaseController {
 
     const date: DateDto = { from, to };
     if (greater || less || date)
-      return this.casesService.filter(date, greater, less);
+      return this.casesService.getByFilter(date, greater, less);
 
     return this.totalService.get();
   }

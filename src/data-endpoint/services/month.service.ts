@@ -15,17 +15,18 @@ export class MonthService {
   public async get(greater?: number, date?: DateDto, less?: number) {
     const query = await this.timeRepo
       .createQueryBuilder('timeseries')
-      .select('timeseries.name', 'name')
+      .select('country.name', 'name')
       .addSelect("DATE_FORMAT(timeseries.date, '%Y-%m')", 'month')
       .addSelect('SUM(timeseries.confirmed)', 'total_confirmed')
       .addSelect('SUM(timeseries.deaths)', 'total_deaths')
       .addSelect('SUM(timeseries.recovered)', 'total_recovered')
-      .groupBy('timeseries.name')
+      .innerJoin('timeseries.country', 'country')
+      .groupBy('country.name')
       .addGroupBy("DATE_FORMAT(timeseries.date, '%Y-%m')");
 
     if (date && date.from != undefined) {
       query.where(
-        "STR_TO_DATE(timeseries.date, '%Y-%c-%e') BETWEEN :from AND :to",
+        "DATE(timeseries.date) BETWEEN :from AND :to",
         { from: date.from, to: date.to },
       );
     }

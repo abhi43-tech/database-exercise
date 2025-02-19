@@ -13,16 +13,10 @@ export class TimeSeries {
   id: number;
 
   @Column({
-    type: 'varchar',
+    type: 'date',
     nullable: false,
   })
-  name: string;
-
-  @Column({
-    type: 'text',
-    nullable: false,
-  })
-  date: string;
+  date: Date;
 
   @Column({
     type: 'int',

@@ -13,9 +13,11 @@ export class TopService {
   // Return top N coutnry with highest total confirmed cases
   public async get(top?: number, date?: DateDto) {
     let data;
-    if (date.from != undefined)
-      data = await this.caseService.filter(date, null, null, top);
-    else data = await this.totalService.get(top ? top : 2);
+    if (date.from != undefined) {
+      data = await this.caseService.getByFilter(date, null, null, top);
+    } else {
+      data = await this.totalService.get(top ? top : 2);
+    }
 
     return data;
   }

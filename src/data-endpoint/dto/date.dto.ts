@@ -8,7 +8,7 @@ export class DateDto {
     type: String,
     required: true,
   })
-  @Matches(/^\d{4}-\d{1,2}-\d{1,2}$/, {
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, {
     message: 'Date must be in YYYY-MM-DD format',
   })
   @IsNotEmpty()
@@ -21,7 +21,7 @@ export class DateDto {
     type: String,
     required: true,
   })
-  @Matches(/^\d{4}-\d{1,2}-\d{1,2}$/, {
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, {
     message: 'Date must be in YYYY-MM-DD format',
   })
   @IsNotEmpty()

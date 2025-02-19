@@ -12,6 +12,7 @@ import { CountryRepository } from './repository/country.repository';
   imports: [TypeOrmModule.forFeature([Countries, TimeSeries])],
   providers: [CountryService, PaginationService, CountryRepository],
   controllers: [CountryController],
+  exports: [CountryRepository]
 })
 export class CountryModule {
   constructor(public dataSource: DataSource) {}

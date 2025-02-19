@@ -12,12 +12,12 @@ import { ExcelService } from './services/file.service';
 import { TopService } from './services/top.service';
 import { TotalService } from './services/total.service';
 import { MonthService } from './services/month.service';
-import { CasesRepository } from './repository/cases.repository';
 import { TotalRepository } from './repository/total.repository';
+import { TimeseriesRepository } from 'src/timeseries/repository/timeseries.repo';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Countries, TimeSeries])],
   controllers: [CaseController,ExcelController, MonthController, TopController, TotalController],
-  providers: [CaseService, ExcelService, TopService, TotalService, MonthService, CasesRepository, TotalRepository],
+  providers: [CaseService, ExcelService, TopService, TotalService, MonthService, TimeseriesRepository, TotalRepository],
 })
 export class DataModule {}

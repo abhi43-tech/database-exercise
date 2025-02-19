@@ -17,11 +17,10 @@ export class TotalRepository extends Repository<TimeSeries> {
   // Response contains total confirmed, total deaths, total recovered for each country
   public async get(condition?: number) {
     const query = await this.createQueryBuilder('timeseries')
-      .select('timeseries.name', 'name')
-      .addSelect('SUM(timeseries.confirmed)', 'confirmed')
+      .select('SUM(timeseries.confirmed)', 'confirmed')
       .addSelect('SUM(timeseries.deaths)', 'deaths')
       .addSelect('SUM(timeseries.recovered)', 'recovered')
-      .groupBy('timeseries.name');
+      .innerJoin('timeseries.country', 'country');
 
     if (condition) query.limit(condition);
 
@@ -31,24 +30,27 @@ export class TotalRepository extends Repository<TimeSeries> {
   }
 
   // filter by between two dates
-  // filter by total confirmedcase is greater or less than a number 
+  // filter by total confirmedcase is greater or less than a number
   public async filter(date?: DateDto, iso?: string) {
-      let filteredCountries = iso
-        ? await this.countryRepo.find({
-            where: { code: iso },
-            select: ['name'],
-          })
-        : [];
-      
-        let condition: any = {}
-      if(iso) condition.name = Not(In(filteredCountries))
-      if(date.from != undefined) {condition.date = Raw(
-        (alias) =>
-          `STR_TO_DATE(${alias}, '%Y-%c-%e') BETWEEN '${date.from}' AND '${date.to}'`,
-      )}
-  
-      return await this.find({
-        where: condition
-      });
+    const fromDate = new Date(date.from);
+    const toDate = new Date(date.to);
+    let filteredCountries = iso
+      ? await this.countryRepo.find({
+          where: { code: iso },
+          select: ['id'],
+        })
+      : [];
+
+    let condition: any = {};
+    if (iso) condition.country = filteredCountries;
+    if (date.from != undefined) {
+      condition.date = Raw(
+        (alias) => `DATE(${alias}) BETWEEN '${fromDate}' AND '${toDate}'`,
+      );
     }
+
+    return await this.find({
+      where: condition,
+    });
+  }
 }
