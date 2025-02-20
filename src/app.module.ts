@@ -7,7 +7,7 @@ import { CountryModule } from './country/country.module';
 import { Countries } from './country/entity/country.entity';
 import { TimeSeries } from './timeseries/entity/timeseries.entity';
 import { TimeSeriesModule } from './timeseries/timeseries.module';
-import { DataModule } from './data-endpoint/data.module';
+import { DataModule } from './timeseries-report/timeseries-report.module';
 
 @Module({
   imports: [
